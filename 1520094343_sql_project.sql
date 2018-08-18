@@ -27,7 +27,7 @@ exploring the data, and getting acquainted with the 3 tables. */
 /* Q1: Some of the facilities charge a fee to members, but some do not.
 Please list the names of the facilities that do. */
 
-SELECT* 
+SELECT*
 FROM `Facilities`
 WHERE membercost > 0.0
 
@@ -78,7 +78,13 @@ Include in your output the name of the court, and the name of the member
 formatted as a single column. Ensure no duplicate data, and order by
 the member name. */
 
-************
+SELECT DISTINCT m.firstname ||  ' ' || m.surname AS member, f.name AS facility
+FROM Members AS m
+INNER JOIN Bookings AS b ON ( m.memid = b.memid ) 
+INNER JOIN Facilities AS f ON ( b.facid = f.facid ) 
+WHERE f.name LIKE  'Tennis%'
+ORDER BY Member, Facility
+
 
 /* Q8: How can you produce a list of bookings on the day of 2012-09-14 which
 will cost the member (or guest) more than $30? Remember that guests have
@@ -87,10 +93,35 @@ the guest user's ID is always 0. Include in your output the name of the
 facility, the name of the member formatted as a single column, and the cost.
 Order by descending cost, and do not use any subqueries. */
 
+SELECT m.firstname AS member,
+       f.name AS facility,
+       (CASE WHEN m.memid = 0 THEN f.guestcost * b.slots
+        ELSE f.membercost * b.slots END) AS cost
+FROM Members AS m
+INNER JOIN Bookings AS b ON (m.memid = b.memid)
+INNER JOIN Facilities AS f ON (b.facid = f.facid)
+WHERE (b.starttime LIKE '2012-09-14%') AND
+ ((m.memid = 0 AND b.slots * f.guestcost > 30) OR
+  (m.memid > 0 AND b.slots * f.membercost > 30))
+ORDER BY cost DESC
 
 /* Q9: This time, produce the same result as in Q8, but using a subquery. */
 
-
+SELECT member, facility, cost from (
+  SELECT
+  m.firstname as member,
+  f.name as facility,
+  CASE WHEN m.memid = 0 THEN b.slots * f.guestcost
+  ELSE b.slots * f.membercost END AS cost
+  FROM Members AS m
+  INNER JOIN Bookings AS b ON m.memid = b.memid
+  INNER JOIN Facilities AS f ON b.facid = f.facid
+  WHERE b.starttime LIKE '2012-09-14%'
+) as Bookings
+WHERE cost > 30
+ORDER BY cost DESC
+   
+   
 /* Q10: Produce a list of facilities with a total revenue less than 1000.
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
