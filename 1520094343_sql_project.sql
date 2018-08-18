@@ -2,9 +2,6 @@
 Springboard' online SQL platform, which you can log into through the
 following link:
 
-https://sql.springboard.com/
-Username: student
-Password: learn_sql@springboard
 
 The data you need is in the "country_club" database. This database
 contains 3 tables:
@@ -78,11 +75,11 @@ Include in your output the name of the court, and the name of the member
 formatted as a single column. Ensure no duplicate data, and order by
 the member name. */
 
-SELECT DISTINCT m.firstname ||  ' ' || m.surname AS member, f.name AS facility
+SELECT DISTINCT CONCAT_WS( ' ', m.firstname, m.surname ) AS member, f.name AS facility
 FROM Members AS m
 INNER JOIN Bookings AS b ON ( m.memid = b.memid ) 
 INNER JOIN Facilities AS f ON ( b.facid = f.facid ) 
-WHERE f.name LIKE  'Tennis%'
+WHERE f.name LIKE 'Tennis%'
 ORDER BY Member, Facility
 
 
@@ -93,7 +90,7 @@ the guest user's ID is always 0. Include in your output the name of the
 facility, the name of the member formatted as a single column, and the cost.
 Order by descending cost, and do not use any subqueries. */
 
-SELECT m.firstname AS member,
+SELECT CONCAT_WS( ' ', m.firstname, m.surname ) AS member,
        f.name AS facility,
        (CASE WHEN m.memid = 0 THEN f.guestcost * b.slots
         ELSE f.membercost * b.slots END) AS cost
@@ -109,7 +106,7 @@ ORDER BY cost DESC
 
 SELECT member, facility, cost from (
   SELECT
-  m.firstname as member,
+  CONCAT_WS( ' ', m.firstname, m.surname ) as member,
   f.name as facility,
   CASE WHEN m.memid = 0 THEN b.slots * f.guestcost
   ELSE b.slots * f.membercost END AS cost
